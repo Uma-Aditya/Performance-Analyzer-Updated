@@ -104,6 +104,17 @@ class Student(Base):
     branch = Column(String, nullable=True)
     year = Column(String, nullable=True)
 
+class PendingStudent(Base):
+    __tablename__ = "pending_students"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String)
+    rollNumber = Column(String, unique=True, index=True)
+    password = Column(String)
+    section = Column(String, nullable=True)
+    branch = Column(String, nullable=True)
+    year = Column(String, nullable=True)
+    status = Column(String, default="pending")
+
 class Teacher(Base):
     __tablename__ = "teachers"
     id = Column(Integer, primary_key=True, index=True)
@@ -400,20 +411,83 @@ async def login_admin(request: AdminLoginRequest):
 async def register_student(request: StudentRegisterRequest):
     db = SessionLocal()
     try:
+        # Check if already a student
         if db.query(Student).filter(Student.rollNumber == request.rollNumber).first():
             raise HTTPException(status_code=400, detail="Student already exists")
         
-        new_student = Student(
+        # Check if already pending
+        if db.query(PendingStudent).filter(PendingStudent.rollNumber == request.rollNumber).first():
+            raise HTTPException(status_code=400, detail="Registration already pending approval")
+        
+        new_pending_student = PendingStudent(
             name=request.name,
             rollNumber=request.rollNumber,
-            password=hash_password(request.password),
+            password=hash_password(request.password), # Store hashed so it's ready upon approval
             section=request.section,
             branch=request.branch,
             year=request.year
         )
-        db.add(new_student)
+        db.add(new_pending_student)
         db.commit()
-        return {"message": "Student registered successfully"}
+        return {"message": "Registration submitted for admin approval"}
+    finally:
+        db.close()
+
+# ─────────────────────────────────────────────
+# F-XX: Admin Student Approval Workflow
+# ─────────────────────────────────────────────
+@app.get("/api/admin/pending-students")
+async def get_pending_students():
+    db: Session = SessionLocal()
+    try:
+        pending = db.query(PendingStudent).all()
+        return [{"rollNumber": p.rollNumber, "name": p.name, "year": p.year, "branch": p.branch, "section": p.section, "status": p.status} for p in pending]
+    finally:
+        db.close()
+
+class BulkRollNumbersRequest(BaseModel):
+    rollNumbers: list[str]
+
+@app.post("/api/admin/pending-students/bulk-approve")
+async def bulk_approve_students(request: BulkRollNumbersRequest):
+    db: Session = SessionLocal()
+    try:
+        pending_students = db.query(PendingStudent).filter(PendingStudent.rollNumber.in_(request.rollNumbers)).all()
+        
+        approved_count = 0
+        for p in pending_students:
+            # Verify they haven't been added manually in the meantime
+            if not db.query(Student).filter(Student.rollNumber == p.rollNumber).first():
+                new_student = Student(
+                    name=p.name,
+                    rollNumber=p.rollNumber,
+                    password=p.password, # Already hashed during registration
+                    section=p.section,
+                    branch=p.branch,
+                    year=p.year
+                )
+                db.add(new_student)
+                approved_count += 1
+            db.delete(p) # Remove from pending
+            
+        db.commit()
+        return {"message": f"Successfully approved {approved_count} students"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        db.close()
+
+@app.post("/api/admin/pending-students/bulk-reject")
+async def bulk_reject_students(request: BulkRollNumbersRequest):
+    db: Session = SessionLocal()
+    try:
+        count = db.query(PendingStudent).filter(PendingStudent.rollNumber.in_(request.rollNumbers)).delete(synchronize_session=False)
+        db.commit()
+        return {"message": f"Successfully rejected {count} registrations"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
     finally:
         db.close()
 

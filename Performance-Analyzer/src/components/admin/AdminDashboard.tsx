@@ -12,6 +12,7 @@ import { SystemStatsPanel } from './SystemStatsPanel';
 import { BranchAnalyticsDashboard } from './BranchAnalyticsDashboard';
 import { AuditLogViewer } from './AuditLogViewer';
 import { BulkAdminImport } from './BulkAdminImport';
+import { PendingRegistrations } from './PendingRegistrations';
 import { useEffect } from 'react';
 import { API_BASE_URL } from '../../config';
 
@@ -138,6 +139,10 @@ const AdminDashboard = () => {
                 <LayoutGrid size={16} />
                 Manage Sections
               </TabsTrigger>
+              <TabsTrigger value="pending" className="flex items-center gap-2">
+                <Users size={16} />
+                Pending Registrations
+              </TabsTrigger>
               <TabsTrigger value="tpo" className="flex items-center gap-2">
                 <Settings size={16} />
                 TPO Controls
@@ -176,6 +181,10 @@ const AdminDashboard = () => {
 
         <TabsContent value="sections">
           <ManageSections />
+        </TabsContent>
+
+        <TabsContent value="pending">
+          <PendingRegistrations />
         </TabsContent>
 
         <TabsContent value="tpo">

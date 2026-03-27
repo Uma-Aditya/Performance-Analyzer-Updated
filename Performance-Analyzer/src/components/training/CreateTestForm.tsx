@@ -186,7 +186,6 @@ export const CreateTestForm = ({ facultyUsername, onTestCreated }: CreateTestFor
                                 onChange={e => setSubject(e.target.value)}
                                 list="test-subjects-list"
                                 placeholder="Type or select subject"
-                                className="bg-background-secondary"
                                 required
                             />
                             <datalist id="test-subjects-list">
