@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import FacultyDashboard from '../components/training/FacultyDashboard';
+import { ArrowLeft, LogOut } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 
 const TrainingAnalyzer = () => {
   const [username, setUsername] = useState('');
@@ -52,12 +54,26 @@ const TrainingAnalyzer = () => {
                   Logged in as: <span className="text-primary font-medium">{username}</span>
                 </p>
               </div>
-              <button
-                onClick={handleLogout}
-                className="px-4 py-2 text-sm bg-secondary/50 hover:bg-secondary rounded-md transition-colors"
-              >
-                Logout
-              </button>
+              <div className="flex items-center gap-3">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => navigate('/')}
+                  className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+                >
+                  <ArrowLeft size={16} />
+                  Home
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={handleLogout}
+                  className="flex items-center gap-2"
+                >
+                  <LogOut size={16} />
+                  Logout
+                </Button>
+              </div>
             </div>
 
             <FacultyDashboard facultyUsername={username} />

@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Award, Briefcase, ExternalLink, UserCircle, Camera, Activity, Target } from 'lucide-react';
+import { Award, Briefcase, ExternalLink, UserCircle, Camera, Activity, Target, ArrowLeft, LogOut } from 'lucide-react';
 import { GoalTrackerView } from '../components/student/GoalTrackerView';
 import { format } from "date-fns";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -157,17 +157,17 @@ const PlacementHub = () => {
                     </AvatarFallback>
                   </Avatar>
 
-                  <div
+                  <div 
                     className="absolute inset-0 bg-black/30 backdrop-blur-sm rounded-full 
                              flex items-center justify-center opacity-0 group-hover:opacity-100
                              transition-opacity duration-200 cursor-pointer"
-                    onClick={triggerFileInput}
+                    onClick={() => fileInputRef.current?.click()}
                   >
                     <Camera className="text-white" size={24} />
                   </div>
 
-                  <input
-                    type="file"
+                  <input 
+                    type="file" 
                     ref={fileInputRef}
                     accept="image/*"
                     className="hidden"
@@ -175,51 +175,62 @@ const PlacementHub = () => {
                   />
                 </div>
 
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="mb-2 w-full bg-secondary/20 hover:bg-secondary/40"
-                  onClick={triggerFileInput}
-                >
-                  <Camera size={14} className="mr-2" />
-                  Update Photo
-                </Button>
-
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="w-full text-destructive hover:text-destructive"
-                  onClick={handleLogout}
-                >
-                  Logout
-                </Button>
+                <div className="flex flex-col gap-2 w-full">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className="w-full bg-secondary/20 hover:bg-secondary/40"
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Camera size={14} className="mr-2" />
+                    Update Photo
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    className="w-full flex items-center gap-2"
+                    onClick={() => navigate('/')}
+                  >
+                    <ArrowLeft size={14} />
+                    Home
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    size="sm"
+                    className="w-full"
+                    onClick={handleLogout}
+                  >
+                    <LogOut size={14} className="mr-2" />
+                    Logout
+                  </Button>
+                </div>
               </div>
 
               <div className="md:w-3/4 p-6">
                 <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
-                  <UserCircle size={24} />
+                  <UserCircle size={24} className="text-primary" />
                   {studentData.name}
                 </h2>
-
+                
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <p className="text-sm text-muted-foreground">Roll Number</p>
-                    <p className="font-medium">{studentData.rollNumber}</p>
+                    <p className="font-medium font-mono">{studentData.rollNumber}</p>
                   </div>
-
+                  
                   <div>
                     <p className="text-sm text-muted-foreground">Email</p>
                     <p className="font-medium">{studentData.email}</p>
                   </div>
-
+                  
                   <div>
-                    <p className="text-sm text-muted-foreground">Batch</p>
-                    <p className="font-medium">{studentData.batch}</p>
+                    <p className="text-sm text-muted-foreground">Academic Year</p>
+                    <p className="font-medium">{studentData.year}</p>
                   </div>
-
+                  
                   <div>
-                    <p className="text-sm text-muted-foreground">Branch</p>
-                    <p className="font-medium">{studentData.branch}</p>
+                    <p className="text-sm text-muted-foreground">Branch & Section</p>
+                    <p className="font-medium">{studentData.branch} - {studentData.section}</p>
                   </div>
                 </div>
               </div>
